@@ -16,6 +16,7 @@ public:
         : myEnd1(e1), myEnd2(e2)
     {
     }
+    void display();
 };
 
 class cIntersection
@@ -50,8 +51,10 @@ class cCity
 public:
     std::vector<cRoad> myRoad;
     std::vector<cIntersection> myIntersection;
+    
     void generate1();
     std::vector<std::vector<cxy>> plotfinder();
+    void DisplayRoads();
 
 private:
     bool nextIntersection(
@@ -128,6 +131,8 @@ void cCity::generate1()
     myRoad.push_back(cRoad(cxy(0, 10), cxy(0, 0)));
     myRoad.push_back(cRoad(cxy(10, 10), cxy(10, 0)));
 
+    DisplayRoads();
+
     for (int kr1 = 0; kr1 < myRoad.size(); kr1++)
         for (int kr2 = kr1 + 1; kr2 < myRoad.size(); kr2++)
         {
@@ -139,10 +144,21 @@ void cCity::generate1()
             {
                 myIntersection.push_back(
                     cIntersection(myRoad[kr1], myRoad[kr2], p));
-                std::cout
-                    << kr1 << " " << kr2 << " at " << p.x << " " << p.y << "\n";
+                // std::cout
+                //     << kr1 << " " << kr2 << " at " << p.x << " " << p.y << "\n";
             }
         }
+}
+
+void cCity::DisplayRoads()
+{
+    for( auto& r : myRoad )
+        r.display();
+}
+void cRoad::display()
+{
+    std::cout << "road from " << myEnd1.x <<", " << myEnd1.y
+        << " to "<< myEnd2.x <<", " << myEnd2.y << "\n";
 }
 
 bool cCity::nextIntersection(
@@ -211,7 +227,6 @@ std::vector<std::vector<cxy>> cCity::plotfinder()
     }
 
     return vplot;
-
 }
 
 main()
