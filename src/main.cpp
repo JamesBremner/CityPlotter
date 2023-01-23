@@ -12,10 +12,18 @@ class cRoad
 public:
     cxy myEnd1;
     cxy myEnd2;
-    cRoad(const cxy &e1, const cxy &e2)
-        : myEnd1(e1), myEnd2(e2)
-    {
-    }
+
+    /**
+     * @brief Construct a new cRoad object
+     * 
+     * @param e1 
+     * @param e2 
+     * 
+     * Road must be specified in approximately east to west or north to south
+     * The CTOR will check for this and swap ends to conform
+     */
+    cRoad(const cxy &e1, const cxy &e2);
+    
     void display();
 };
 
@@ -51,7 +59,7 @@ class cCity
 public:
     std::vector<cRoad> myRoad;
     std::vector<cIntersection> myIntersection;
-    
+
     void generate1();
     std::vector<std::vector<cxy>> plotfinder();
     void DisplayRoads();
@@ -60,10 +68,30 @@ private:
     bool nextIntersection(
         cIntersection &next,
         const cIntersection &inter,
-        const cRoad& r);
+        const cRoad &r);
 };
 
+cRoad::cRoad(const cxy &e1, const cxy &e2)
+    : myEnd1(e1), myEnd2(e2)
+{
+    double a = cxy::angle(
+        cxy(0, 0), cxy(1,0),
+        e1, e2);
 
+    // check road is specified east to west
+    if( fabs(a) < 0.8)
+        return;
+    
+    // check road is specified north to south
+    if( fabs( a + 1.57 ) < 0.8)
+        return;
+
+    // swap road direction
+    myEnd1 = e2;
+    myEnd2 = e1;
+
+    std::cout << a << "\n";
+}
 
 cRoad cIntersection::EastToWest()
 {
@@ -86,34 +114,36 @@ cRoad cIntersection::WestToEast()
 
 cRoad cIntersection::closest(const cxy &d1, const cxy &d2)
 {
-    cRoad ret( myLocation, myRoad1->myEnd2);
+    cRoad ret(myLocation, myRoad1->myEnd2);
 
-    double ra = fabs( cxy::angle(d1, d2,
-                           myRoad1->myEnd1, myRoad1->myEnd2));
-    
+    double ra = fabs(cxy::angle(d1, d2,
+                                myRoad1->myEnd1, myRoad1->myEnd2));
+
     double a = fabs(cxy::angle(d1, d2,
-                           myRoad2->myEnd1, myRoad2->myEnd2));
-    if( a < ra) {
+                               myRoad2->myEnd1, myRoad2->myEnd2));
+    if (a < ra)
+    {
         ra = a;
-        ret.myEnd2 =  myRoad2->myEnd2;
+        ret.myEnd2 = myRoad2->myEnd2;
     }
 
     a = fabs(cxy::angle(d1, d2,
-                           myRoad1->myEnd2, myRoad1->myEnd1));
-    if( a < ra) {
+                        myRoad1->myEnd2, myRoad1->myEnd1));
+    if (a < ra)
+    {
         ra = a;
         ret.myEnd2 = myRoad1->myEnd1;
     }
 
     a = fabs(cxy::angle(d1, d2,
-                           myRoad2->myEnd2, myRoad2->myEnd1));
-    if( a < ra) {
+                        myRoad2->myEnd2, myRoad2->myEnd1));
+    if (a < ra)
+    {
         ra = a;
         ret.myEnd2 = myRoad2->myEnd1;
     }
 
-   // std::cout << rn << " " << ra << "\n";
-
+    // std::cout << rn << " " << ra << "\n";
 
     return ret;
 }
@@ -126,10 +156,10 @@ void cIntersection::display()
 
 void cCity::generate1()
 {
-    myRoad.push_back(cRoad(cxy(0, 0), cxy(10, 0)));
-    myRoad.push_back(cRoad(cxy(0, 10), cxy(10, 10)));
-    myRoad.push_back(cRoad(cxy(0, 10), cxy(0, 0)));
-    myRoad.push_back(cRoad(cxy(10, 10), cxy(10, 0)));
+    myRoad.push_back(cRoad(cxy(100, 0), cxy(-100, 0)));
+    myRoad.push_back(cRoad(cxy(-100, 10), cxy(100, 10)));
+    myRoad.push_back(cRoad(cxy(0, 100), cxy(0, -100)));
+    myRoad.push_back(cRoad(cxy(10, 100), cxy(10, -100)));
 
     DisplayRoads();
 
@@ -152,19 +182,19 @@ void cCity::generate1()
 
 void cCity::DisplayRoads()
 {
-    for( auto& r : myRoad )
+    for (auto &r : myRoad)
         r.display();
 }
 void cRoad::display()
 {
-    std::cout << "road from " << myEnd1.x <<", " << myEnd1.y
-        << " to "<< myEnd2.x <<", " << myEnd2.y << "\n";
+    std::cout << "road from " << myEnd1.x << ", " << myEnd1.y
+              << " to " << myEnd2.x << ", " << myEnd2.y << "\n";
 }
 
 bool cCity::nextIntersection(
     cIntersection &next,
     const cIntersection &inter,
-    const cRoad& r)
+    const cRoad &r)
 {
     for (auto &nextInter : myIntersection)
     {
@@ -174,8 +204,8 @@ bool cCity::nextIntersection(
         double d = nextInter.myLocation.dis2toline(r.myEnd1, r.myEnd2);
         if (d < 1)
         {
-            //std::cout << "next " << d << " ";
-            //nextInter.display();
+            // std::cout << "next " << d << " ";
+            // nextInter.display();
             next = nextInter;
             return true;
         }
@@ -203,7 +233,7 @@ std::vector<std::vector<cxy>> cCity::plotfinder()
         // find next intersection on road
         cIntersection next1;
         if (!nextIntersection(next1, inter, road))
-            continue;   // intersection does not exist, so this is not a plot
+            continue; // intersection does not exist, so this is not a plot
 
         // add to plot
         plot.push_back(next1.myLocation);
@@ -232,7 +262,7 @@ std::vector<std::vector<cxy>> cCity::plotfinder()
 main()
 {
     cCity theCity;
-    
+
     theCity.generate1();
 
     auto vplot = theCity.plotfinder();
